@@ -16,6 +16,14 @@ router.patch(
 );
 
 router
+  .route("/currentUser")
+  .get(
+    authController.protect,
+    userController.getCurrentUser,
+    userController.getUser,
+  );
+
+router
   .route("/")
   .get(authController.protect, userController.getAllUsers)
   .delete(authController.protect, userController.deleteCurrentUser);
