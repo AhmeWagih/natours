@@ -9,33 +9,23 @@ router.post("/login", authController.login);
 router.post("/forgetPassword", authController.forgetPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
 
-router.patch(
-  "/updatePassword",
-  authController.protect,
-  authController.updatePassword,
-);
+router.use(authController.protect);
+
+router.patch("/updatePassword", authController.updatePassword);
 
 router
   .route("/currentUser")
-  .get(
-    authController.protect,
-    userController.getCurrentUser,
-    userController.getUser,
-  );
+  .get(userController.getCurrentUser, userController.getUser);
 
 router
   .route("/")
-  .get(authController.protect, userController.getAllUsers)
-  .delete(authController.protect, userController.deleteCurrentUser);
+  .get(authController.restrictTo("admin"), userController.getAllUsers)
+  .delete(userController.deleteCurrentUser);
 
 router
   .route("/:id")
   .get(userController.getUser)
-  .patch(authController.protect, userController.updateUser)
-  .delete(
-    authController.protect,
-    authController.restrictTo("admin"),
-    userController.deleteUser,
-  );
+  .patch(userController.updateUser)
+  .delete(authController.restrictTo("admin"), userController.deleteUser);
 
 module.exports = router;
