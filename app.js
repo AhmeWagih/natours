@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 
 
 const AppError = require("./utils/appError");
@@ -25,13 +26,14 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware
 // Set security HTTP headers
 app.use(helmet());
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
       baseUri: ["'self'"],
       fontSrc: ["'self'", "https:", "data:"],
-      scriptSrc: ["'self'", "https://api.mapbox.com", "blob:"],
+      scriptSrc: ["'self'", "https://api.mapbox.com", "https://cdn.jsdelivr.net", "blob:"],
       styleSrc: ["'self'", "https:", "'unsafe-inline'"],
       imgSrc: [
         "'self'",
@@ -45,6 +47,7 @@ app.use(
         "https://api.mapbox.com",
         "https://*.tiles.mapbox.com",
         "https://events.mapbox.com",
+        "https://cdn.jsdelivr.net",
       ],
       workerSrc: ["'self'", "blob:"],
       childSrc: ["'self'", "blob:"],
@@ -69,6 +72,7 @@ app.use("/api", limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({limit: "10kb"}));
+app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -84,6 +88,8 @@ app.use(hpp({
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
+  
   next();
 });
 

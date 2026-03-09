@@ -15,14 +15,16 @@ const signToken = (id) => {
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
     httpOnly: true,
-  }
-  if(process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-  res.cookie('jwt', token, cookieOptions) 
+  };
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+  res.cookie("jwt", token, cookieOptions);
 
   user.password = undefined;
-  
+
   res.status(statusCode).json({
     status: "success",
     token,
@@ -30,7 +32,7 @@ const createSendToken = (user, statusCode, res) => {
       user,
     },
   });
-}
+};
 
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -69,6 +71,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -103,6 +107,50 @@ exports.protect = catchAsync(async (req, res, next) => {
   res.locals.user = currentUser;
   next();
 });
+
+exports.isLoggedIn =async (req, res, next) => {
+  try {
+    if (req.cookies.jwt) {
+      // 2) Verification token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
+  
+      // 3) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next(
+          new AppError(
+            "The user belonging to this token does no longer exist.",
+            401,
+          ),
+        );
+      }
+  
+      // 4) Check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+  
+      // There is a logged in user
+      // req.user = currentUser;
+      res.locals.user = currentUser;
+      return next();
+    }
+  } catch (err) {
+    return next();
+  }
+  next();
+};
+
+exports.logout = (req, res) => {
+  res.cookie("jwt", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: "success" });
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
@@ -160,17 +208,26 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
     return next(
-      new AppError("There was an error sending the email. Try again later!", 500),
+      new AppError(
+        "There was an error sending the email. Try again later!",
+        500,
+      ),
     );
   }
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
-  const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
-  const user = await User.findOne({passwordResetToken: hashedToken, passwordResetExpires: {$gt: Date.now()}});
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
   // 2) Check if token is not expired
-  if(!user) {
+  if (!user) {
     return next(new AppError("Token is invalid or has expired", 400));
   }
   user.password = req.body.password;
@@ -186,7 +243,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user.id).select("+password");
   // 2) Check if posted current password is correct
-  if(!(await user.correctPassword(req.body.currentPassword, user.password))) {
+  if (!(await user.correctPassword(req.body.currentPassword, user.password))) {
     return next(new AppError("Your current password is wrong", 401));
   }
   // 3) If so, update password

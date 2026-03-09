@@ -5,9 +5,6 @@ block append head
   script(src='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js')
   link(href='https://api.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet')
 
-block append scripts
-  script(type='module' src='/js/tourMap.js')
-
 mixin overviewBox(label,text,icon)
   .overview-box__detail
     svg.overview-box__icon
