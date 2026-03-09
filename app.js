@@ -25,6 +25,33 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware
 // Set security HTTP headers
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'self'"],
+      fontSrc: ["'self'", "https:", "data:"],
+      scriptSrc: ["'self'", "https://api.mapbox.com", "blob:"],
+      styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https://api.mapbox.com",
+        "https://*.tiles.mapbox.com",
+      ],
+      connectSrc: [
+        "'self'",
+        "https://api.mapbox.com",
+        "https://*.tiles.mapbox.com",
+        "https://events.mapbox.com",
+      ],
+      workerSrc: ["'self'", "blob:"],
+      childSrc: ["'self'", "blob:"],
+      objectSrc: ["'none'"],
+    },
+  }),
+);
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
