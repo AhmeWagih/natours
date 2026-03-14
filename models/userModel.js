@@ -16,11 +16,14 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email"],
     },
-    photo: String,
-    role:{
+    photo: {
       type: String,
-      enum:["user", "guide", "lead-guide", "admin"],
-      default: "user"
+      default: "default.jpg",
+    },
+    role: {
+      type: String,
+      enum: ["user", "guide", "lead-guide", "admin"],
+      default: "user",
     },
     password: {
       type: String,
@@ -64,10 +67,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.pre(/^find/, function(next){
+userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
   next();
-})
+});
 
 userSchema.methods.correctPassword = async function (
   candidatePassword,
