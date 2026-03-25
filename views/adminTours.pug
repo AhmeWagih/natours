@@ -1,0 +1,58 @@
+extends base
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          li.side-nav--active
+            a(href='/account')
+              svg
+                use(xlink:href='img/icons.svg#icon-settings')
+              | Back
+          li.side-nav--active
+            a(href='/admin/tours')
+              svg
+                use(xlink:href='img/icons.svg#icon-map')
+              | Manage Tours
+          li.side-nav--active
+            a(href='/admin/users')
+              svg
+                use(xlink:href='img/icons.svg#icon-users')
+              | Manage Users
+          li.side-nav--active
+            a(href='/admin/bookings')
+              svg
+                use(xlink:href='img/icons.svg#icon-booking')
+              | Manage Bookings
+          li.side-nav--active
+            a(href='/admin/reviews')
+              svg
+                use(xlink:href='img/icons.svg#icon-review')
+              | Manage Reviews
+
+      .user-view__content
+        .admin-view__form-container
+          h2.heading-secondary.ma-bt-md Manage all tours
+          
+          .admin-table
+            table
+              thead
+                tr
+                  th Tour Name
+                  th Duration
+                  th Difficulty
+                  th Price
+                  th Guides
+                  th Actions
+              tbody
+                each tour in tours
+                  tr
+                    td= tour.name
+                    td= tour.duration + ' days'
+                    td= tour.difficulty
+                    td $#{tour.price}
+                    td= tour.guides.length
+                    td.admin-buttons
+                      a(href=`/tour/${tour.slug}`) 👁️
+                      button(data-tour-id=tour._id) 🗑️

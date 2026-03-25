@@ -1,0 +1,55 @@
+extends base
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          li.side-nav--active
+            a(href='/account')
+              svg
+                use(xlink:href='img/icons.svg#icon-settings')
+              | Back
+          li.side-nav--active
+            a(href='/admin/tours')
+              svg
+                use(xlink:href='img/icons.svg#icon-map')
+              | Manage Tours
+          li.side-nav--active
+            a(href='/admin/users')
+              svg
+                use(xlink:href='img/icons.svg#icon-users')
+              | Manage Users
+          li.side-nav--active
+            a(href='/admin/bookings')
+              svg
+                use(xlink:href='img/icons.svg#icon-booking')
+              | Manage Bookings
+          li.side-nav--active
+            a(href='/admin/reviews')
+              svg
+                use(xlink:href='img/icons.svg#icon-review')
+              | Manage Reviews
+
+      .user-view__content
+        .admin-view__form-container
+          h2.heading-secondary.ma-bt-md Manage all bookings
+          
+          .admin-table
+            table
+              thead
+                tr
+                  th Tour
+                  th User
+                  th Price ($)
+                  th Booking Date
+                  th Actions
+              tbody
+                each booking in bookings
+                  tr
+                    td= booking.tour.name
+                    td= booking.user.name
+                    td= booking.price
+                    td= booking.createdAt.toLocaleDateString()
+                    td
+                      button.btn-admin-delete(data-booking-id=booking._id) Delete

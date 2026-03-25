@@ -1,0 +1,57 @@
+extends base
+
+block content
+  main.main
+    .user-view
+      nav.user-view__menu
+        ul.side-nav
+          li.side-nav--active
+            a(href='/account')
+              svg
+                use(xlink:href='img/icons.svg#icon-settings')
+              | Back
+          li.side-nav--active
+            a(href='/admin/tours')
+              svg
+                use(xlink:href='img/icons.svg#icon-map')
+              | Manage Tours
+          li.side-nav--active
+            a(href='/admin/users')
+              svg
+                use(xlink:href='img/icons.svg#icon-users')
+              | Manage Users
+          li.side-nav--active
+            a(href='/admin/bookings')
+              svg
+                use(xlink:href='img/icons.svg#icon-booking')
+              | Manage Bookings
+          li.side-nav--active
+            a(href='/admin/reviews')
+              svg
+                use(xlink:href='img/icons.svg#icon-review')
+              | Manage Reviews
+
+      .user-view__content
+        .admin-view__form-container
+          h2.heading-secondary.ma-bt-md Manage all users
+          
+          .admin-table
+            table
+              thead
+                tr
+                  th Name
+                  th Email
+                  th Role
+                  th Photo
+                  th Actions
+              tbody
+                each user in users
+                  tr
+                    td= user.name
+                    td= user.email
+                    td
+                      span.badge(class=`badge--${user.role}`)= user.role
+                    td
+                      img.admin-table__img(src=`/img/users/${user.photo}` alt=user.name)
+                    td
+                      button.btn-admin-delete(data-user-id=user._id) Delete

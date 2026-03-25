@@ -1,0 +1,26 @@
+extends base
+
+block content
+  main.main
+    .login-form
+      h2.heading-secondary.ma-bt-lg My reviews
+
+      if reviews.length === 0
+        p.ma-bt-lg You have not written any reviews yet.
+      else
+        each review in reviews
+          .card.ma-bt-md
+            .card__details
+              h4.card__sub-heading= review.tour ? review.tour.name : 'Deleted tour'
+              p.card__text= review.review
+              .card__data
+                svg.card__icon
+                  use(xlink:href='/img/icons.svg#icon-star')
+                span= `${review.rating} / 5`
+              .card__data
+                svg.card__icon
+                  use(xlink:href='/img/icons.svg#icon-calendar')
+                span= new Date(review.createdAt).toLocaleString('en-US', { month: 'long', year: 'numeric' })
+            .card__footer
+              if review.tour
+                a.btn.btn--green.btn--small(href=`/tour/${review.tour.slug}`) View tour
